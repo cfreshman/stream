@@ -1,0 +1,17 @@
+# dependencies
+/node_modules
+
+# build
+/build
+
+# keep .gitkeep dirs
+!.gitkeep
+
+
+# misc
+.DS_Store
+/.vscode
+*.log*
+
+# contentious
+yarn.lock

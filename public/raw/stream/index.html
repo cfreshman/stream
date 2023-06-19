@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<!-- stream
+media
+-->
+<html>
+<head>
+<title>[=]</title>
+<script src="/copyright.js"></script>
+
+<meta charset=utf-8>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --background: #f9f8f6;
+    --color: #101010;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  html, body {
+    margin: 0;
+  }
+  html {
+    background: var(--background);
+    color: var(--color);
+    font-size: 12px;
+  }
+  body {
+    font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    padding: .5rem 1rem;
+    overflow-x: visible;
+  }
+  a {
+    color: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+</style>
+
+<script type='text/javascript'>
+  window.Q = (doc, selector) => {
+    if (selector === undefined) {
+      selector = doc
+      doc = document
+    }
+    return doc.querySelector(selector)
+  }
+  window.QQ = (doc, selector) => {
+    if (selector === undefined) {
+      selector = doc
+      doc = document
+    }
+    return Array.from(doc.querySelectorAll(selector))
+  }
+  window.on = (el, evts, func, opts=undefined) => evts.split(' ').map(evt => el.addEventListener(evt, func, opts))
+</script>
+<link rel="icon" href="">
+<link rel="apple-touch-icon-precomposed" href="">
+<meta property="og:image" content="">
+<meta property="og:title" content="">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="">
+</head>
+<body>
+
+  <div style="display:flex;flex-direction:column;width:fit-content;margin:auto;align-items:center">
+    <div id="list"></div>
+    <style>
+      #list {
+        min-height: 200vh;
+      }
+      #list > .item {
+        position: relative;
+        padding-top: 1em;
+        width: 100%;
+        max-width: min(36em, calc(100vw - 1em));
+      }
+      #list > .item > .content {
+        white-space: pre-wrap;
+        background: white;
+        color: black;
+        padding: .5em 1em;
+        padding-bottom: 2.5em;
+        font-size: .8em;
+      }
+      #list > .item > .label {
+        font-size: .8em;
+        text-align: right;
+
+        position: absolute; bottom: 0; right: 0;
+        margin: .25em;
+        color: white;
+      }
+      #list > .item > .label::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0;
+        height: 100%; width: 100%;
+        background: #000;
+      }
+      #list > .item a {
+        text-decoration: none;
+        mix-blend-mode: difference;
+      }
+      #list > .item > :first-child {
+        width: 100%;
+        border: 1px solid black;
+        display: flex;
+      }
+      #list > .item > .palette {
+        position: absolute;
+        top: 0; left: 100%; margin: 0 .5em;
+      }
+    </style>
+    <script>
+      const hr = new Date().getHours()
+      const nighttime = hr < 7 || 12 + 6 < hr
+
+      const scrollToItem = () => {
+        const item = new URLSearchParams(location.search).get('')
+        console.debug(item && `#item-${item.split('.')[0]}`)
+        if (item) {
+          document.querySelector(`#item-${item.split('.')[0]}`).scrollIntoView({ block: 'start' })
+        }
+      }
+
+      const list = Q('#list')
+      const item = new URLSearchParams(location.search).get('')
+      const stream_name = ''
+      const stream_path = `/${stream_name || 'stream'}`
+      fetch('/api/stream/' + stream_name)
+      .then(res => res.json())
+      .then(files => {
+        console.debug(files)
+        list.innerHTML = files
+          .map(file => {
+            const path = `/raw${stream_path}/items/${file}`
+            const [_, name, extension] = /([^\.]+)(\..+)$/.exec(file) || []
+            console.debug(name, extension)
+            switch (extension) {
+              case '.png': case '.jpg':
+                return `<img src="${path}" />`
+              case '.html':
+                return `<iframe src="${path}" onload="
+                const L = event.target
+                L.height = L.contentWindow.document.documentElement.scrollHeight + 2
+                setInterval(() => {
+                  L.height = L.contentWindow.document.documentElement.scrollHeight + 2
+                }, 100)
+                scrollToItem()
+                "></iframe>`
+              default:
+                fetch(path)
+                .then(res => res.text())
+                .then(text => {
+                  console.debug(text)
+                  Q(`#content-${name}`).innerHTML = text
+                })
+                return `<div class='content' id="content-${name}">[...]</div>`
+            }
+          })
+          .map((x, i) => {
+            const encoded = files[i]
+            const name = decodeURIComponent(encoded)
+            return `
+          <div class="item" id="item-${encoded.split('.')[0]}">
+            ${x}
+            ${
+              item === name ? `<div class="label" style="bottom:1.3em"><a target="_blank" href="${location.pathname}/items/${name}">new tab ↗</a></div>` : ``
+            }
+            <div class="label">${
+              `<a href="?=${encoded}">${name}</a>`
+            }</div>
+          </div>`
+          })
+          .join('\n') + (nighttime ? `
+          <style>
+            :root {
+              --background: #322c2c;
+              --color: #f1f1f1;
+            }
+          </style>
+          ` : '')
+
+        scrollToItem()
+        Array.from(list.querySelectorAll('iframe')).map(frame => frame.addEventListener('load', () => {
+          try {
+            const links = Array.from(frame.contentWindow.window.document.querySelectorAll('a[href]'))
+            console.debug(frame.src, links.map(x => x.href))
+            links.map(link => link.addEventListener('click', e => {
+              if (!link.href.startsWith(location.origin)) {
+                e.preventDefault()
+                e.stopPropagation()
+                window.open(link.href, '_blank')
+              }
+            }))
+          } catch {}
+        }))
+      })
+    </script>
+  </div>
+
+</body>
+</html>

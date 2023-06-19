@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>error</title>
+    <script src="/copyright.js"></script>
+    <meta charset=utf-8><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    <style>
+        html {
+            font-family: monospace;
+            white-space: pre;
+            padding: 1em;
+        }
+    </style>
+</head>
+<body><span id=error>not found</span>
+
+→ <a id=home href="https://freshman.dev">freshman.dev</a>
+
+<script>
+    error.textContent += ` (${location.href.replace(location.origin, '')})`
+    home.href = 'http://'+location.host
+</script>
+
+</body>
+</html>

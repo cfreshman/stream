@@ -1,0 +1,25 @@
+server {
+    server_name ~^stream\. xn--bdk.day _;
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /home/stream/live/public;
+    error_page 404 /404.html;
+    error_page 400 500 502 /error.html;
+
+    error_page 418 = @dynamic; # use it's a teapot error code as goto
+    location @dynamic {
+        client_max_body_size 100M;
+        proxy_pass http://[::1]:5724$request_uri;
+        include sites-available/fragments/proxy;
+    }
+    location /api { return 418; }
+    location / {
+        try_files $uri $uri/ @dynamic;
+
+        # send all to dynamic for preview meta info:
+        # return 418;
+
+        # if you have a lot of traffic and your site breaks:
+        # try_files $uri $uri/ /raw/stream/index.html;
+    }
+}
