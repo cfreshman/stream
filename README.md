@@ -27,6 +27,8 @@ exit
 yarn admin
 yarn deploy
 ```
+add IP to deploy/nginx/index
+if you have a domain, add 'A' record for stream.<domain> with IP
 
 ```
 ... idk I'll finish this later

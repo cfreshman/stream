@@ -1,7 +1,7 @@
 server {
-    server_name ~^stream\. xn--bdk.day _;
-    listen 80 default_server;
-    listen [::]:80 default_server;
+    server_name ~^stream\. xn--bdk.day;
+    listen 80;
+    listen [::]:80;
     root /home/stream/live/public;
     error_page 404 /404.html;
     error_page 400 500 502 /error.html;

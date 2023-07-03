@@ -97,6 +97,9 @@ media
         top: 0; left: 0;
         height: 100%; width: 100%;
         background: #000;
+
+        background: var(--color);
+        color: var(--background);
       }
       #list > .item a {
         text-decoration: none;
@@ -104,7 +107,7 @@ media
       }
       #list > .item > :first-child {
         width: 100%;
-        border: 1px solid black;
+        border: 1px solid var(--color);
         display: flex;
       }
       #list > .item > .palette {
