@@ -8,7 +8,7 @@ yarn dev
 ![](https://uh.software/api/file/public-stream.png)
 
 # prod
-- find a computer that'll stay on all the time and install Ubuntu 22
+- find a computer that'll stay on all the time (or use VirtualBox) and install Ubuntu 22
 - figure out the IP and edit .env
 ```
 STREAM_DOT_HOST=<IP>
@@ -29,7 +29,3 @@ yarn deploy
 ```
 add IP to deploy/nginx/index
 if you have a domain, add 'A' record for stream.<domain> with IP
-
-```
-... idk I'll finish this later
-```
