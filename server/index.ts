@@ -1,9 +1,10 @@
-import cors from 'cors'
-import express from 'express'
+import path from 'path';
 import fs from 'fs'
 import * as http from 'http'
 import { createRequire } from 'module'
 import process from 'process'
+import cors from 'cors'
+import express from 'express'
 import { domains, replace } from './projects'
 import { default as routes } from './routes'
 import { datetime, er, file, list, pick, prod, rand, requestkey, servertime, set } from './util'
@@ -201,6 +202,85 @@ function configure(...x) {
     Object
     .entries(routes)
     .map(([path, index]) => app.use('/api/'+path, index.routes))
+
+    // stream meta responses
+    let streamDefaults, streamTemplates, streamIndex
+    app.get(['/-?stream', '/-?raw/stream'], async (req, res) => {
+        let html = streamIndex = streamIndex || fs.readFileSync(path.join(file.path, 'raw/stream/index.html')).toString()
+        const [_, search] = /\?(.+)/.exec(req.url) || ['', '']
+        const query = new URLSearchParams(search)
+        let item = query.get('')?.split('?')[0]
+        if (!item) {
+            // const dir = fs.readdirSync(path.join(staticPath, 'raw/stream/items'))
+            // item = dir[0]
+        }
+        console.debug('STREAM', req.url, item)
+        if (item) {
+            if (!streamDefaults) {
+                streamDefaults = {}
+                streamTemplates = {}
+                template.recurse(template.regex.index, streamDefaults, streamTemplates, html)
+                console.debug(streamDefaults, streamTemplates)
+            }
+            let item_href = `/raw/stream/items/${item}`
+            let item_html = fs.readFileSync(path.join(file.path,  item_href)).toString()
+            const redirect_match = /<script>location.href='(?<href>.+)'<\/script>/.exec(item_html)
+            console.debug(redirect_match)
+            if (redirect_match?.groups) {
+                console.debug(path.join(file.path, redirect_match?.groups?.href))
+                item_href = redirect_match.groups.href
+                item_html = fs.readFileSync(path.join(file.path, item_href, 'index.html')).toString()
+            }
+
+            const title_match = /<title>(?<value>[^<]*)<\/title>/.exec(item_html) as any
+            const description_match = /<meta name=description content="(?<value>[^"]*)"/.exec(item_html) as any
+            // console.debug({title_match,description_match})
+            let title
+            if (title_match && description_match) title = `(${title_match.groups.value}) ${description_match.groups.value}`
+            else if (title_match || description_match) title = (title_match || description_match).groups.value
+            else {
+                const body_match = /<body(?:[^>]*)>(?<value>[^<]*)<\/body>/.exec(item_html) as any
+                if (body_match) title = body_match.groups.value
+                else {
+                    const url = new URL(item)
+                    title = url.search.slice(2) || item
+                }
+            }
+
+            const img_match = /<img src=(?<value>([^ ]+)|(['"][^'"]['"])) /.exec(item_html)
+            console.debug({...img_match?.groups}, item_html)
+            const icon = `https://freshman.dev${item_href}/${img_match?.groups?.value.replace(/"/g, '') || ''}`
+            const replacements = { title, icon, og: {title,icon}, twitter: {
+                card: 'summary_large_image',
+            } }
+            console.debug('STREAM ITEM', item, replacements)
+            ;[
+                [template.regex.index.title, replacements.title],
+                [template.regex.index.icon, replacements.icon],
+                [template.regex.index.og.title, replacements.og.title],
+                [template.regex.index.og.image, replacements.og.icon],
+                [template.regex.index.twitter.card, replacements.twitter.card],
+            ].forEach(([regex, replacement]) => {
+                const match = html.match(regex)
+                const value = match[0]
+                if (value) {
+                    // match[1] either ("<match>") or ("") or (<match>) or ()
+                    // match[2] either (<match>) or () or undefined
+                    // if match[2] truthy or undefined, replace (match[2] || match[1]) with replacement
+                    // else, replace match[1] with centered replacement
+                    const center = Math.floor(match[1].length / 2)
+                    const actual = match[2] !== ''
+                    ? value.replace(match[2] || match[1], replacement)
+                    : value.replace(
+                        match[1],
+                        match[1].slice(0, center) + replacement + match[1].slice(center))
+                    html = html.replace(regex, actual)
+                }
+            })
+            // html = template.recurse(html, replacements, template.regex.index, streamDefaults, streamTemplates)
+        }
+        res.send(html)
+    })
 
     // production build
     //

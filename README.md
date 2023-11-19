@@ -29,3 +29,8 @@ yarn deploy
 ```
 add IP to deploy/nginx/index
 if you have a domain, add 'A' record for stream.<domain> with IP
+
+# gallery
+![](https://uh.software/api/file/public-stream-1.png)
+![](https://uh.software/api/file/public-stream-2.png)
+![](https://uh.software/api/file/public-stream-3.png)

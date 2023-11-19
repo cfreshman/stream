@@ -7,7 +7,6 @@ import { fileURLToPath } from 'url'
 export const prod = process.env.NODE_ENV === 'production'
 export const dev = !prod
 
-
 export const pass = x=>x
 export const truthy = x=>!!x
 export const exists = x => x !== undefined
