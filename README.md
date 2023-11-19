@@ -1,5 +1,7 @@
 [stream-landing.uh.software](https://uh.software/raw/stream-landing)
 
+It's like html VSCO
+
 # dev
 ```
 yarn dev
@@ -30,7 +32,10 @@ yarn deploy
 add IP to deploy/nginx/index
 if you have a domain, add 'A' record for stream.<domain> with IP
 
+```
+... idk I'll finish this later
+```
+
 # gallery
-![](https://uh.software/api/file/public-stream-1.png)
-![](https://uh.software/api/file/public-stream-2.png)
-![](https://uh.software/api/file/public-stream-3.png)
+![](https://uh.software/api/file/public-stream-readme-1.png) |
+![](https://uh.software/api/file/public-stream-1.png) |
