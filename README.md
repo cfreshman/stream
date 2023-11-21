@@ -2,6 +2,8 @@
 
 It's like html VSCO
 
+Tell me if you start using it!
+
 # dev
 ```
 yarn dev
