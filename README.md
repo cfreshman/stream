@@ -39,5 +39,7 @@ if you have a domain, add 'A' record for stream.<domain> with IP
 ```
 
 # gallery
-![](https://uh.software/api/file/public-stream-readme-1.png) |
-![](https://uh.software/api/file/public-stream-1.png) |
+| as seen on [stream.freshman.dev](https://stream.freshman.dev) |
+| --- |
+| ![](https://uh.software/api/file/public-stream-readme-1.png) |
+| ![](https://uh.software/api/file/public-stream-1.png) |

@@ -242,13 +242,14 @@ function configure(...x) {
                 const body_match = /<body(?:[^>]*)>(?<value>[^<]*)<\/body>/.exec(item_html) as any
                 if (body_match) title = body_match.groups.value
                 else {
-                    const url = new URL(item)
-                    title = url.search.slice(2) || item
+                    let url
+                    try{ url = new URL(item) }catch{}
+                    title = url?.search.slice(2) || item
                 }
             }
 
             const img_match = /<img src=(?<value>([^ ]+)|(['"][^'"]['"])) /.exec(item_html)
-            console.debug({...img_match?.groups}, item_html)
+            // console.debug({...img_match?.groups}, item_html)
             const icon = `https://freshman.dev${item_href}/${img_match?.groups?.value.replace(/"/g, '') || ''}`
             const replacements = { title, icon, og: {title,icon}, twitter: {
                 card: 'summary_large_image',
