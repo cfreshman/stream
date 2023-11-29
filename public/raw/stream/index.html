@@ -55,6 +55,8 @@
     #bottom::after {
       content: " →";
     }
+
+    :root {--button:#eee;}button,a,input,*[onclick]{font-family:inherit;font-size:max(1em, 12px);cursor:pointer;touch-action:manipulation;}button,input:is(:not([type]),[type=text],[type=password],[type=email]){border:1px solid currentColor;border-radius:10em;padding:.1667em.67em;height:calc(100%-1px);margin:.5px 0;}button{background:var(--button);user-select:none;}
   </style>
 
   <script type='text/javascript'>
@@ -91,6 +93,15 @@
 
   <div style="display:flex;flex-direction:column;width:fit-content;margin:auto;align-items:center">
     <div id="list"></div>
+    <button style="
+    position: sticky;
+    bottom: .5em; margin-top: 100vh;
+    z-index: 1;
+    transform: translate3d(0,0,0);
+    " onclick="
+    event.preventDefault()
+    Q('#list').scrollIntoView({block:'start'})
+    ">scroll to top</button>
     <style>
       #list {
         min-height: 200vh;
@@ -185,16 +196,8 @@
         .then(async ([files, pins=[[], new Set()]]) => {
           console.debug('render stream', {files, pins})
 
-          if (!pins[0].length) {
-            document.body.append(node(`<style>
-              #list::before {
-                display: none;
-              }
-            </style>`))
-          }
-
           const renders = {}
-          list.innerHTML = files
+          list.innerHTML += files
             .filter(file => !file.startsWith('-'))
             .map(file => {
               const path = `/raw${stream_path}/items/${file}`
@@ -254,14 +257,12 @@
             .map((render, i) => {
               const encoded = files[i]
               const name = decodeURIComponent(encoded)
-              const socials = (window['stream-item-socials']||{})[name]||[]
-              // <div class="label">${
-              //   item === name && name.endsWith('.html') ? `<div class="label" style="bottom:1.3em"><a href="${location.pathname}items/${name}">open ${name} ↗</a></div>` : `<a href="?=${encoded}">${name}</a>`
-              // }</div>
+              const socials = (window['stream-item-socials'] || {})[name]
 
               const id = `item-${encoded.split('.')[0]}`
+              const pinned = pins[1].has(encoded)
               let load_on_scroll_into_view
-              if (pins[1].has(encoded)) {
+              if (pinned) {
                 load_on_scroll_into_view = render
               } else {
                 renders[id] = render
@@ -270,8 +271,8 @@
               
               return `
             <div class="item" id="${id}" style="
-            order: ${pins[1].has(encoded) ? -(pins[0].length - pins[0].indexOf(encoded)) : i};
-            ${pins[1].has(encoded) ? `
+            order: ${pinned ? -(pins[0].length - pins[0].indexOf(encoded)) : i};
+            ${pinned ? `
             margin-top: calc(-1em - 1px) !important;
             ` : ''}
             ">
@@ -311,6 +312,7 @@
                     item = item.parentNode
                   }
 
+                  document.title = '[=]'
                   QQ('.label.hidden').map(x => x.style.display = 'none')
 
                   if (show_new_tab) {
