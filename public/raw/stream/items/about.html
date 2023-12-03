@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8><script src=https://freshman.dev/copyright.js></script><meta data-hydrate data-style />
+  <style>
+    a {
+      color: #1155cc;
+    }
+  </style>
+</head>
+<body>
+
+  <b><a href=https://github.com/cfreshman/stream>about stream.</a></b>
+  <br />
+  <div>
+    <span>(your name & bio here)</span>
+  </div>
+  <div>
+    <a href="#">@your_handle</a>/Twitter
+  </div>
+  <br />
+  <div class=row>
+    <a><button onclick="
+    const scrolled = Q(top.document, '#list')
+    let _scrollTop = 0
+    scrolled.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end',
+    })
+    loop(handle => {
+      if (scrolled.scrollTop === 0) handle.interrupt()
+      else if (scrolled.scrollTop === _scrollTop) {
+        scrolled.scrollTop = 0
+      }
+      _scrollTop = scrolled.scrollTop
+    }, 100)
+    ">load all</button></a>
+  </div>
+
+</body>
+</html>
+
+<!-- 
+<body style="background:#fff;font-family:monospace;display:flex;flex-direction:column;min-height:0">
+  <a href=https://raw.tu.fo/stream-landing>about stream.</a>
+  <br/>
+  <span>tap 🔔 (and other emojis) for signups</span>
+  <br/>
+  <span><a href=/contact>/contact</a>   <a href=/twitter>@freshman_dev</a>/Twitter</span>
+  <a href=/home>/home</a>
+</body> -->

@@ -84,15 +84,23 @@
       const query_keys = set(',', ',')
       const query = new URLSearchParams(location.search)
       list(query.keys()).filter(k => !query_keys.has(k) && query.delete(k))
-      if (query?.get('')?.split('?').length > 1) {
-        query.set('', query.get('').split('?')[0])
-      }
-      url.replace(location.origin + location.pathname + ('?'+query.toString()).replace(/^\?$/, '') + location.hash)
+      query.set('', query?.get('').split('?')[0] || '')
+      url.replace(location.origin + location.pathname + ('?'+query.toString()) + location.hash)
     }
   </script>
 
   <div style="display:flex;flex-direction:column;width:fit-content;margin:auto;align-items:center">
-    <div id="list"></div>
+    <div id="list">
+      <button style="
+      order: 0;
+      width: fit-content;
+      align-self: center;
+      margin-top: -1em;
+      " onclick="
+      event.preventDefault()
+      Q('#list').scrollIntoView({behavior:'smooth',block:'end'})
+      ">load all</button>
+    </div>
     <button style="
     position: sticky;
     bottom: .5em; margin-top: 100vh;
@@ -103,10 +111,12 @@
     Q('#list').scrollIntoView({block:'start'})
     ">scroll to top</button>
     <style>
-      #list {
+      body {
         min-height: 200vh;
-        display: flex; flex-direction: column;
         padding-bottom: 67vh;
+      }
+      #list {
+        display: flex; flex-direction: column;
       }
       #list::before {
         order: 0;
@@ -181,7 +191,7 @@
       {
         const stream_name = ''
         const stream_path = `/${stream_name || 'stream'}`
-        // try { dependency(`/raw${stream_path}/items/-socials.js`) } catch {}
+        try { dependency(`/raw${stream_path}/items/-socials.js`) } catch {}
 
         const list = Q('#list')
         const item = new URLSearchParams(location.search).get('')?.split('?')[0]
@@ -317,6 +327,7 @@
 
                   if (show_new_tab) {
                     QQ(item, '.label').map(x => x.style.display = 'unset')
+                    document.title = '${name}'
                     item.scrollIntoView()
                   }
                 }
@@ -349,7 +360,7 @@
             </style>
             ` : '')
 
-          let unloaded = QQ(list, '.item')
+          let unloaded = QQ(list, '.item:has(.render-target)')
           let scroll_in_progress = 0
           const Scale = {
             SCALED: (window.innerWidth * .8) / list.clientWidth,
@@ -365,27 +376,21 @@
               scroll_in_progress = 1
               unloaded = unloaded.filter(l => {
                 const rect = l.getBoundingClientRect()
-                if (0 <= rect.y + rect.height + innerHeight/2 && rect.y - innerHeight/2 <= innerHeight) {
+                if (0 <= rect.y + rect.height + innerHeight && rect.y - innerHeight <= innerHeight) {
                   const render_target = Q(l, '.render-target')
                   // if (!render_target) console.debug(l)
                   // render_target.innerHTML = `LOAD ${l.id}`
                   render_target.innerHTML = '(loading)'
                   let as_rendered_innerHTML = Array.isArray(renders[l.id])
-                  if (as_rendered_innerHTML) {
-                    try {
+                  try {
+                    if (as_rendered_innerHTML) {
                       renders[l.id][0]()
                       renders[l.id] = renders[l.id][1]
-                    } catch {}
-                  } else {
-                    render_target.outerHTML = renders[l.id]
-                  }
+                    } else {
+                      render_target.outerHTML = renders[l.id]
+                    }
+                  } catch {}
                   delete renders[l.id]
-                  // defer(() => {
-                  //   Q(l, 'iframe').style.cssText = `;
-                  //   scale: ${scale};
-                  //   transform-origin: top;
-                  //   `
-                  // })
                   return false
                 } else {
                   return true
