@@ -43,8 +43,6 @@
       text-decoration: none;
       font-size: .9em;
       padding: .15em .3em;
-      /* background: black;
-      color: white; */
       border: 1px solid var(--color);
       border-radius: 2px;
       opacity: .3;
@@ -84,7 +82,7 @@
       const query_keys = set(',', ',')
       const query = new URLSearchParams(location.search)
       list(query.keys()).filter(k => !query_keys.has(k) && query.delete(k))
-      query.set('', query?.get('').split('?')[0] || '')
+      query.set('', query.get('')?.split('?')[0] || '')
       url.replace(location.origin + location.pathname + ('?'+query.toString()) + location.hash)
     }
   </script>
@@ -178,8 +176,7 @@
       const hr = new Date().getHours()
       const nighttime = hr < 7 || 12 + 6 < hr
 
-      const scrollToItem = (item=new URLSearchParams(location.search).get('')?.split('?')[0]) => {
-        // console.debug(item && `#item-${item.split('.')[0]}`)
+      const scrollToItem = window['scrollToItem'] = (item=new URLSearchParams(location.search).get('')?.split('?')[0]) => {
         if (item) {
           const element = document.querySelector(`#item-${item.split('.')[0]}`)
           document.querySelector(`#item-${item.split('.')[0]}`).scrollIntoView({
@@ -212,7 +209,6 @@
             .map(file => {
               const path = `/raw${stream_path}/items/${file}`
               let [_, name, extension] = /([^\.]+)((?:\..+)+)$/.exec(file) || []
-              // console.debug(name, extension)
 
               switch (extension) {
                 case '.png': case '.jpg':
@@ -233,6 +229,10 @@
                     else setTimeout(() => requestAnimationFrame(resize_loop), 1_000)
                   }
                   resize_loop()
+
+                  if ('${file}' === location.search.slice(2)) {
+                    window['scrollToItem']()
+                  }
 
                   try {
                     if (L.src === L.contentWindow.window.location.href && ${extension === '.href.txt'}) {
@@ -345,12 +345,6 @@
               }
             </div>`
             })
-            // .map((x, i) => `
-            // <div class="item">
-            //   <div class="content">${x}</div>
-            //   <div class="label">${decodeURI(files[i])}</div>
-            //   <div class="palette"><a href="?=${files[i]}">#</a></div>
-            // </div>`)
             .join('\n') + (nighttime ? `
             <style>
               :root {
@@ -371,15 +365,13 @@
           let start_ms = performance.now()
           const handleScroll = e => {
             if (scroll_in_progress) return
-            if (performance.now() - start_ms > 250 && e && !e.originalEvent) user_scroll = true
+            if (performance.now() - start_ms > 250) user_scroll = true
             try {
               scroll_in_progress = 1
               unloaded = unloaded.filter(l => {
                 const rect = l.getBoundingClientRect()
                 if (0 <= rect.y + rect.height + innerHeight && rect.y - innerHeight <= innerHeight) {
                   const render_target = Q(l, '.render-target')
-                  // if (!render_target) console.debug(l)
-                  // render_target.innerHTML = `LOAD ${l.id}`
                   render_target.innerHTML = '(loading)'
                   let as_rendered_innerHTML = Array.isArray(renders[l.id])
                   try {
@@ -396,7 +388,6 @@
                   return true
                 }
               })
-              if (!user_scroll) scrollToItem()
             } catch {} finally {
               scroll_in_progress = 0
             }
@@ -404,18 +395,10 @@
           on(window, 'scroll click', handleScroll)
           handleScroll()
           scrollToItem()
-          const handle = setInterval(handle => {
-            if (user_scroll) clearInterval(handle)
-            else {
-              scrollToItem()
-              defer(() => user_scroll = false)
-            }
-          }, 10)
 
           Array.from(list.querySelectorAll('iframe')).map(frame => frame.addEventListener('load', () => {
             try {
               const links = Array.from(frame.contentWindow.window.document.querySelectorAll('a[href]'))
-              // console.debug(frame.src, links.map(x => x.href))
               links.map(link => link.addEventListener('click', e => {
                 if (!link.href.startsWith(location.origin)) {
                   e.preventDefault()

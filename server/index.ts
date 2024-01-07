@@ -250,10 +250,9 @@ function configure(...x) {
 
             const img_match = /<img src=(?<value>([^ ]+)|(['"][^'"]['"])) /.exec(item_html)
             // console.debug({...img_match?.groups}, item_html)
-            const icon = `https://freshman.dev${item_href}/${img_match?.groups?.value.replace(/"/g, '') || ''}`
-            const replacements = { title, icon, og: {title,icon}, twitter: {
-                card: 'summary_large_image',
-            } }
+            const img_local_url = img_match?.groups?.value.replace(/"/g, '') || ''
+            const icon = img_local_url.startsWith('http') ? img_local_url : `https://freshman.dev${item_href}/${img_local_url}`
+            const replacements = { title, icon, og: {title,icon}, twitter: {card: 'summary_large_image', image: icon} }
             console.debug('STREAM ITEM', item, replacements)
             ;[
                 [template.regex.index.title, replacements.title],

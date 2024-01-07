@@ -4,6 +4,8 @@ It's like html VSCO
 
 Tell me if you start using it!
 
+Create your own without a server using Glitch: [remix me](https://glitch.com/~far-melted-stork)
+
 # dev
 ```
 yarn dev
@@ -35,7 +37,7 @@ add IP to deploy/nginx/index
 if you have a domain, add 'A' record for stream.<domain> with IP
 
 ```
-... idk I'll finish this later
+... idk I'll finish this later. you'll at least need to install Node.js v20
 ```
 
 # gallery
