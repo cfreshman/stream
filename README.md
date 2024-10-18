@@ -1,4 +1,4 @@
-[stream-landing.uh.software](https://uh.software/raw/stream-landing)
+[freshman.dev/raw/stream-landing](https://freshman.dev/raw/stream-landing)
 
 It's like html VSCO
 
@@ -11,7 +11,7 @@ Create your own without a server using Glitch: [remix me](https://glitch.com/~fa
 yarn dev
 ```
 
-![](https://uh.software/api/file/public-stream.png)
+![](https://freshman.dev/api/file/public-stream.png)
 
 # prod
 - find a computer that'll stay on all the time (or use VirtualBox) and install Ubuntu 22
@@ -39,10 +39,3 @@ if you have a domain, add 'A' record for stream.<domain> with IP
 ```
 ... idk I'll finish this later. you'll at least need to install Node.js v20
 ```
-
-# gallery
-| as seen on [stream.freshman.dev](https://stream.freshman.dev) |
-| --- |
-| ![](https://uh.software/api/file/public-stream-readme-1.png) |
-| ![](https://uh.software/api/file/public-stream-1.png) |
-| ![](https://uh.software/api/file/public-george.png) |
