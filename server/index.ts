@@ -4,18 +4,17 @@ import fs from 'fs'
 import * as http from 'http'
 import { createRequire } from 'module'
 import process from 'process'
-import { domains, replace } from './projects'
 import { default as routes } from './routes'
 import { datetime, er, file, list, pick, prod, rand, requestkey, servertime, set } from './util'
 
+import * as socket_io from 'socket.io'
 
-console.debug('env', pick(process.env, 'NODE_ENV STREAM_SERVER_PORT STREAM_SUBDOMAIN'))
-list('uncaughtException unhandledRejection')
-.map(x => process.on(x, e => console.error(x, e)))
 
 const app = express()
+const port = 7405 // CMDS
 const server = http.createServer(app)
-const port = 5723 // STREam
+
+console.debug('env', pick(process.env, 'NODE_ENV STREAM_SERVER_PORT STREAM_SUBDOMAIN'))
 list('uncaughtException exit SIGINT SIGUSR1 SIGUSR2 SIGTERM')
 .map(evt => process.on(evt, ()=>{
     if (server.listening) {
@@ -24,6 +23,13 @@ list('uncaughtException exit SIGINT SIGUSR1 SIGUSR2 SIGTERM')
         process.exit(0)
     }
 }))
+
+const io = new socket_io.Server(server, {
+    cors: {
+        origin: true,
+        methods: ["GET", "POST"]
+    }
+})
 
 const template = {
     regex: {
@@ -169,19 +175,6 @@ function configure(...x) {
         ...rules,
     }))
 
-    // host => app
-    app.get('/*', async (rq, rs, nx) => {
-        Object.entries(domains).some(([name, domain]) => {
-            if (rq.url.match(new RegExp(`^/${name}/.+`, 'i'))) {
-                rq.domain_app = name
-                rq.url = rq.url.replace(new RegExp(`${name}/?`, 'i'), '')
-                rq.origin = domain
-                nx()
-                return true
-            }
-        }) || nx()
-    })
-
     // TODO backoff for logged requests
     // probability based on time since last log?
     const silence = set([
@@ -241,18 +234,7 @@ function configure(...x) {
         console.error(Number(now), datetime(now), err)
         nx(err)
     })
-
-    // run production scripts
-    if (prod) {
-        const scripts = Object.fromEntries(list('start once').map(x => [x, `server/scripts/${x}.js`]).map(([x, path]) => [x, fs.existsSync(path) && fs.readFileSync(path).toString()]))
-        console.debug({ scripts })
-        Object.entries(scripts).map(([name, file]) => file && createRequire(import.meta.url)(`./scripts/${name}`))
-        if (scripts.once) {
-            fs.writeFileSync('server/scripts/used/once.js', scripts.once)
-            fs.writeFileSync('server/scripts/once.js', '')
-        }
-    }
-
+    
     console.debug('defined', app._router.stack.length, 'routes')
 }
 
